@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/segmentio/ksuid"
-	"github.com/sourabhmandal/gokeycloak/pkg/jwx"
+	"github.com/zblocks/gokeycloak/pkg/jwx"
 )
 
 // LoginAdmin performs a login with Admin client
