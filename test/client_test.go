@@ -547,7 +547,7 @@ func Test_GetRequestingPartyPermissions(t *testing.T) {
 		cfg.GoKeycloak.Password)
 	require.NoError(t, err, "login failed")
 
-	rpp, err := client.GetRequestingPartyPermissions(
+	_, rpp, err := client.GetRequestingPartyPermissions(
 		context.Background(),
 		token.AccessToken,
 		"",
@@ -560,7 +560,7 @@ func Test_GetRequestingPartyPermissions(t *testing.T) {
 	require.Error(t, err, "GetRequestingPartyPermissions failed")
 	require.Nil(t, rpp)
 
-	rpp, err = client.GetRequestingPartyPermissions(
+	_, rpp, err = client.GetRequestingPartyPermissions(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -593,7 +593,7 @@ func Test_GetRequestingPartyPermissionDecision(t *testing.T) {
 		cfg.GoKeycloak.Password)
 	require.NoError(t, err, "login failed")
 
-	dec, err := client.GetRequestingPartyPermissionDecision(
+	_, dec, err := client.GetRequestingPartyPermissionDecision(
 		context.Background(),
 		token.AccessToken,
 		"",
@@ -603,7 +603,7 @@ func Test_GetRequestingPartyPermissionDecision(t *testing.T) {
 	require.Error(t, err, "GetRequestingPartyPermissions failed")
 	require.Nil(t, dec)
 
-	dec, err = client.GetRequestingPartyPermissionDecision(
+	_, dec, err = client.GetRequestingPartyPermissionDecision(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -1549,7 +1549,7 @@ func Test_ClientScopeMappingsRealmRoles(t *testing.T) {
 	var roles []gokeycloak.Role
 	tearDownRealmRole1, roleName := CreateRealmRole(t, client)
 	defer tearDownRealmRole1()
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -1559,7 +1559,7 @@ func Test_ClientScopeMappingsRealmRoles(t *testing.T) {
 	roles = append(roles, *role)
 	tearDownRealmRole2, roleName := CreateRealmRole(t, client)
 	defer tearDownRealmRole2()
-	role, err = client.GetRealmRole(
+	_, role, err = client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -1585,7 +1585,7 @@ func Test_ClientScopeMappingsRealmRoles(t *testing.T) {
 		"GetClientScopeMappingsRealmRoles should return exact %s realm", len(roles),
 	)
 
-	realmRoles, err = client.GetRealmRoles(
+	_, realmRoles, err = client.GetRealmRoles(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2035,8 +2035,8 @@ func Test_GetGroupsByRole(t *testing.T) {
 	roleTearDown, roleName := CreateRealmRole(t, client)
 	defer roleTearDown()
 
-	role, _ := client.GetRealmRole(ctx, token.AccessToken, cfg.GoKeycloak.Realm, roleName)
-	_ = client.AddRealmRoleToGroup(ctx, token.AccessToken, cfg.GoKeycloak.Realm, groupID, []gokeycloak.Role{*role})
+	_, role, _ := client.GetRealmRole(ctx, token.AccessToken, cfg.GoKeycloak.Realm, roleName)
+	_, _ = client.AddRealmRoleToGroup(ctx, token.AccessToken, cfg.GoKeycloak.Realm, groupID, []gokeycloak.Role{*role})
 
 	_, groupsByRole, err := client.GetGroupsByRole(ctx, token.AccessToken, cfg.GoKeycloak.Realm, *role.Name)
 	require.NoError(t, err, "GetGroupsByRole failed")
@@ -2256,7 +2256,7 @@ func Test_SendVerifyEmail(t *testing.T) {
 		ClientID: &(cfg.GoKeycloak.ClientID),
 	}
 
-	err := client.SendVerifyEmail(
+	_, err := client.SendVerifyEmail(
 		context.Background(),
 		token.AccessToken,
 		userID,
@@ -2432,7 +2432,7 @@ func CreateRealmRole(t *testing.T, client *gokeycloak.GoKeycloak) (func(), strin
 
 	roleName := GetRandomName("Role")
 	t.Logf("Creating RoleName: %s", roleName)
-	realmRoleID, err := client.CreateRealmRole(
+	_, realmRoleID, err := client.CreateRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2443,7 +2443,7 @@ func CreateRealmRole(t *testing.T, client *gokeycloak.GoKeycloak) (func(), strin
 	require.NoError(t, err, "CreateRealmRole failed")
 	require.Equal(t, roleName, realmRoleID)
 	tearDown := func() {
-		err := client.DeleteRealmRole(
+		_, err := client.DeleteRealmRole(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -2469,7 +2469,7 @@ func Test_GetRealmRole(t *testing.T) {
 	tearDown, roleName := CreateRealmRole(t, client)
 	defer tearDown()
 
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2492,7 +2492,7 @@ func Test_GetRealmRoles(t *testing.T) {
 	tearDown, _ := CreateRealmRole(t, client)
 	defer tearDown()
 
-	roles, err := client.GetRealmRoles(
+	_, roles, err := client.GetRealmRoles(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2510,7 +2510,7 @@ func Test_UpdateRealmRole(t *testing.T) {
 	newRoleName := GetRandomName("Role")
 	_, oldRoleName := CreateRealmRole(t, client)
 
-	err := client.UpdateRealmRole(
+	_, err := client.UpdateRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2519,7 +2519,7 @@ func Test_UpdateRealmRole(t *testing.T) {
 			Name: &newRoleName,
 		})
 	require.NoError(t, err, "UpdateRealmRole failed")
-	err = client.DeleteRealmRole(
+	_, err = client.DeleteRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2529,7 +2529,7 @@ func Test_UpdateRealmRole(t *testing.T) {
 		err,
 		"Role with old name was deleted successfully, but it shouldn't. Old role: %s; Updated role: %s",
 		oldRoleName, newRoleName)
-	err = client.DeleteRealmRole(
+	_, err = client.DeleteRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2545,7 +2545,7 @@ func Test_DeleteRealmRole(t *testing.T) {
 
 	_, roleName := CreateRealmRole(t, client)
 
-	err := client.DeleteRealmRole(
+	_, err := client.DeleteRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2563,7 +2563,7 @@ func Test_AddRealmRoleToUser_DeleteRealmRoleFromUser(t *testing.T) {
 	defer tearDownUser()
 	tearDownRole, roleName := CreateRealmRole(t, client)
 	defer tearDownRole()
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2571,7 +2571,7 @@ func Test_AddRealmRoleToUser_DeleteRealmRoleFromUser(t *testing.T) {
 	require.NoError(t, err, "GetRealmRole failed")
 
 	roles := []gokeycloak.Role{*role}
-	err = client.AddRealmRoleToUser(
+	_, err = client.AddRealmRoleToUser(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2579,7 +2579,7 @@ func Test_AddRealmRoleToUser_DeleteRealmRoleFromUser(t *testing.T) {
 		roles,
 	)
 	require.NoError(t, err, "AddRealmRoleToUser failed")
-	err = client.DeleteRealmRoleFromUser(
+	_, err = client.DeleteRealmRoleFromUser(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2599,7 +2599,7 @@ func Test_AddRealmRoleToGroup_DeleteRealmRoleFromGroup(t *testing.T) {
 	defer tearDownGroup()
 	tearDownRole, roleName := CreateRealmRole(t, client)
 	defer tearDownRole()
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2607,7 +2607,7 @@ func Test_AddRealmRoleToGroup_DeleteRealmRoleFromGroup(t *testing.T) {
 	require.NoError(t, err, "GetRealmRole failed")
 
 	roles := []gokeycloak.Role{*role}
-	err = client.AddRealmRoleToGroup(
+	_, err = client.AddRealmRoleToGroup(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2615,7 +2615,7 @@ func Test_AddRealmRoleToGroup_DeleteRealmRoleFromGroup(t *testing.T) {
 		roles,
 	)
 	require.NoError(t, err, "AddRealmRoleToGroup failed")
-	err = client.DeleteRealmRoleFromGroup(
+	_, err = client.DeleteRealmRoleFromGroup(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2635,14 +2635,14 @@ func Test_GetRealmRolesByUserID(t *testing.T) {
 	defer tearDownUser()
 	tearDownRole, roleName := CreateRealmRole(t, client)
 	defer tearDownRole()
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName)
 	require.NoError(t, err)
 
-	err = client.AddRealmRoleToUser(
+	_, err = client.AddRealmRoleToUser(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2652,7 +2652,7 @@ func Test_GetRealmRolesByUserID(t *testing.T) {
 		})
 	require.NoError(t, err)
 
-	roles, err := client.GetRealmRolesByUserID(
+	_, roles, err := client.GetRealmRolesByUserID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2671,7 +2671,7 @@ func Test_GetRealmRolesByUserID(t *testing.T) {
 	}
 	require.True(t, found, "The role has not been found in the assigned roles. Role: %+v", *role)
 
-	roles, err = client.GetCompositeRealmRolesByUserID(
+	_, roles, err = client.GetCompositeRealmRolesByUserID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2701,7 +2701,7 @@ func Test_GetRealmRolesByGroupID(t *testing.T) {
 	tearDown, roleName := CreateRealmRole(t, client)
 	defer tearDown()
 
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2709,7 +2709,7 @@ func Test_GetRealmRolesByGroupID(t *testing.T) {
 	)
 	require.NoError(t, err, "Can't get just created role with GetRealmRole")
 
-	err = client.AddRealmRoleToGroup(
+	_, err = client.AddRealmRoleToGroup(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2719,7 +2719,7 @@ func Test_GetRealmRolesByGroupID(t *testing.T) {
 		})
 	require.NoError(t, err)
 
-	roles, err := client.GetRealmRolesByGroupID(
+	_, roles, err := client.GetRealmRolesByGroupID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2741,7 +2741,7 @@ func Test_AddRealmRoleComposite_DeleteRealmRoleComposite(t *testing.T) {
 	tearDown, roleName := CreateRealmRole(t, client)
 	defer tearDown()
 
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2749,7 +2749,7 @@ func Test_AddRealmRoleComposite_DeleteRealmRoleComposite(t *testing.T) {
 	)
 	require.NoError(t, err, "Can't get just created role with GetRealmRole")
 
-	err = client.AddRealmRoleComposite(
+	_, err = client.AddRealmRoleComposite(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -2758,7 +2758,7 @@ func Test_AddRealmRoleComposite_DeleteRealmRoleComposite(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = client.DeleteRealmRoleComposite(
+	_, err = client.DeleteRealmRoleComposite(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3110,13 +3110,13 @@ func Test_GetUsersByRoleName(t *testing.T) {
 	tearDownRole, roleName := CreateRealmRole(t, client)
 	defer tearDownRole()
 
-	role, err := client.GetRealmRole(
+	_, role, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName)
 	require.NoError(t, err)
-	err = client.AddRealmRoleToUser(
+	_, err = client.AddRealmRoleToUser(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3692,21 +3692,21 @@ func Test_GetAvailableRealmRolesByUserID(t *testing.T) {
 	tearDownRole2, roleName2 := CreateRealmRole(t, client)
 	defer tearDownRole2()
 
-	role1, err := client.GetRealmRole(
+	_, role1, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName1)
 	require.NoError(t, err)
 
-	role2, err := client.GetRealmRole(
+	_, role2, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName2)
 	require.NoError(t, err)
 
-	err = client.AddRealmRoleToUser(
+	_, err = client.AddRealmRoleToUser(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3715,7 +3715,7 @@ func Test_GetAvailableRealmRolesByUserID(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	roles, err := client.GetRealmRolesByUserID(
+	_, roles, err := client.GetRealmRolesByUserID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3734,7 +3734,7 @@ func Test_GetAvailableRealmRolesByUserID(t *testing.T) {
 	}
 	require.True(t, found, "The role1 has not been found in the assigned roles. Role: %+v", *role1)
 
-	roles, err = client.GetAvailableRealmRolesByUserID(
+	_, roles, err = client.GetAvailableRealmRolesByUserID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3843,21 +3843,21 @@ func Test_GetAvailableRealmRolesByGroupID(t *testing.T) {
 	tearDownRole2, roleName2 := CreateRealmRole(t, client)
 	defer tearDownRole2()
 
-	role1, err := client.GetRealmRole(
+	_, role1, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName1)
 	require.NoError(t, err)
 
-	role2, err := client.GetRealmRole(
+	_, role2, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
 		roleName2)
 	require.NoError(t, err)
 
-	err = client.AddRealmRoleToGroup(
+	_, err = client.AddRealmRoleToGroup(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3866,7 +3866,7 @@ func Test_GetAvailableRealmRolesByGroupID(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	roles, err := client.GetRealmRolesByGroupID(
+	_, roles, err := client.GetRealmRolesByGroupID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -3886,7 +3886,7 @@ func Test_GetAvailableRealmRolesByGroupID(t *testing.T) {
 	}
 	require.True(t, found, "The role1 has not been found in the assigned roles. Role: %+v", *role1)
 
-	roles, err = client.GetAvailableRealmRolesByGroupID(
+	_, roles, err = client.GetAvailableRealmRolesByGroupID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4054,7 +4054,7 @@ func Test_AddDeleteRealmRoleComposite(t *testing.T) {
 	tearDown, role := CreateRealmRole(t, client)
 	defer tearDown()
 
-	compositeRoleModel, err := client.GetRealmRole(
+	_, compositeRoleModel, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4062,7 +4062,7 @@ func Test_AddDeleteRealmRoleComposite(t *testing.T) {
 	)
 	require.NoError(t, err, "Can't get just created role with GetRealmRole")
 
-	roleModel, err := client.GetRealmRole(
+	_, roleModel, err := client.GetRealmRole(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4070,7 +4070,7 @@ func Test_AddDeleteRealmRoleComposite(t *testing.T) {
 	)
 	require.NoError(t, err, "Can't get just created role with GetRealmRole")
 
-	err = client.AddRealmRoleComposite(
+	_, err = client.AddRealmRoleComposite(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4079,7 +4079,7 @@ func Test_AddDeleteRealmRoleComposite(t *testing.T) {
 	)
 	require.NoError(t, err, "AddRealmRoleComposite failed")
 
-	compositeRoles, err := client.GetCompositeRealmRolesByRoleID(
+	_, compositeRoles, err := client.GetCompositeRealmRolesByRoleID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4089,7 +4089,7 @@ func Test_AddDeleteRealmRoleComposite(t *testing.T) {
 	require.GreaterOrEqual(t, len(compositeRoles), 1, "GetCompositeRealmRolesByRoleID didn't return any composite roles")
 	require.Equal(t, *(roleModel.ID), *(compositeRoles[0].ID), "GetCompositeRealmRolesByRoleID returned wrong composite role")
 
-	err = client.DeleteRealmRoleComposite(
+	_, err = client.DeleteRealmRoleComposite(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4121,7 +4121,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 			"hostedDomain": "test.io",
 		},
 	}
-	res, err := client.CreateIdentityProvider(
+	_, res, err := client.CreateIdentityProvider(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4141,7 +4141,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 		},
 	}
 
-	mapperPID, err := client.CreateIdentityProviderMapper(
+	_, mapperPID, err := client.CreateIdentityProviderMapper(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4151,7 +4151,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, mapperPID)
 
-	mappers, err := client.GetIdentityProviderMappers(
+	_, mappers, err := client.GetIdentityProviderMappers(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4164,7 +4164,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 
 	mapperP.ID = mapperID
 	// get single mapper
-	err = client.UpdateIdentityProviderMapper(
+	_, err = client.UpdateIdentityProviderMapper(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4173,7 +4173,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	mapper, err := client.GetIdentityProviderMapperByID(
+	_, mapper, err := client.GetIdentityProviderMapperByID(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -4187,7 +4187,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 	require.NotNil(t, mapper.Config)
 
 	defer func() {
-		err = client.DeleteIdentityProviderMapper(
+		_, err = client.DeleteIdentityProviderMapper(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4196,7 +4196,7 @@ func Test_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		err = client.DeleteIdentityProvider(
+		_, err = client.DeleteIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4351,7 +4351,7 @@ func Test_CreateProvider(t *testing.T) {
 				"hostedDomain": "test.io",
 			},
 		}
-		provider, err := client.CreateIdentityProvider(
+		_, provider, err := client.CreateIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4374,7 +4374,7 @@ func Test_CreateProvider(t *testing.T) {
 				"clientSecret": cfg.GoKeycloak.ClientSecret,
 			},
 		}
-		provider, err := client.CreateIdentityProvider(
+		_, provider, err := client.CreateIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4397,7 +4397,7 @@ func Test_CreateProvider(t *testing.T) {
 				"clientSecret": cfg.GoKeycloak.ClientSecret,
 			},
 		}
-		provider, err := client.CreateIdentityProvider(
+		_, provider, err := client.CreateIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4421,7 +4421,7 @@ func Test_CreateProvider(t *testing.T) {
 				"hostedDomain": "updated-test.io",
 			},
 		}
-		err := client.UpdateIdentityProvider(
+		_, err := client.UpdateIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4431,7 +4431,7 @@ func Test_CreateProvider(t *testing.T) {
 		require.NoError(t, err)
 
 		// listing identity providers here must now show three
-		providers, err := client.GetIdentityProviders(
+		_, providers, err := client.GetIdentityProviders(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4441,7 +4441,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Delete google provider", func(t *testing.T) {
-		err := client.DeleteIdentityProvider(
+		_, err := client.DeleteIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4451,7 +4451,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("List providers", func(t *testing.T) {
-		providers, err := client.GetIdentityProviders(
+		_, providers, err := client.GetIdentityProviders(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4461,7 +4461,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Get microsoft provider", func(t *testing.T) {
-		provider, err := client.GetIdentityProvider(
+		_, provider, err := client.GetIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4472,7 +4472,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Delete microsoft provider", func(t *testing.T) {
-		err := client.DeleteIdentityProvider(
+		_, err := client.DeleteIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4482,7 +4482,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Delete github provider", func(t *testing.T) {
-		err := client.DeleteIdentityProvider(
+		_, err := client.DeleteIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4503,7 +4503,7 @@ func Test_CreateProvider(t *testing.T) {
 				"singleSignOnServiceUrl": "https://samlIDPexample.com",
 			},
 		}
-		provider, err := client.CreateIdentityProvider(
+		_, provider, err := client.CreateIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4514,7 +4514,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Get saml provider", func(t *testing.T) {
-		provider, err := client.GetIdentityProvider(
+		_, provider, err := client.GetIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4525,7 +4525,7 @@ func Test_CreateProvider(t *testing.T) {
 	})
 
 	t.Run("Get saml provider public broker config", func(t *testing.T) {
-		config, err := client.ExportIDPPublicBrokerConfig(
+		_, config, err := client.ExportIDPPublicBrokerConfig(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -4535,7 +4535,7 @@ func Test_CreateProvider(t *testing.T) {
 		require.NotEmpty(t, *(config))
 	})
 	t.Run("Delete saml provider", func(t *testing.T) {
-		err := client.DeleteIdentityProvider(
+		_, err := client.DeleteIdentityProvider(
 			context.Background(),
 			token.AccessToken,
 			cfg.GoKeycloak.Realm,
@@ -5340,7 +5340,7 @@ func Test_RolePolicy(t *testing.T) {
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
 
-	roles, err := client.GetRealmRoles(
+	_, roles, err := client.GetRealmRoles(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6073,7 +6073,7 @@ func Test_ImportIdentityProviderConfig(t *testing.T) {
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
 
-	actual, err := client.ImportIdentityProviderConfig(
+	_, actual, err := client.ImportIdentityProviderConfig(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6141,7 +6141,7 @@ E8go1LcvbfHNyknHu2sptnRq55fHZSHr18vVsQRfDYMG</ds:X509Certificate>
   </md:IDPSSODescriptor>
 </md:EntityDescriptor>`
 
-	actual, err := client.ImportIdentityProviderConfigFromFile(
+	_, actual, err := client.ImportIdentityProviderConfigFromFile(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6183,7 +6183,7 @@ func TestGocloak_GetAuthenticationFlows(t *testing.T) {
 	cfg := GetConfig(t)
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
-	authFlows, err := client.GetAuthenticationFlows(
+	_, authFlows, err := client.GetAuthenticationFlows(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6192,7 +6192,7 @@ func TestGocloak_GetAuthenticationFlows(t *testing.T) {
 	t.Logf("authentication flows: %+v", authFlows)
 
 	FailRequest(client, nil, 1, 0)
-	_, err = client.GetAuthenticationFlows(
+	_, _, err = client.GetAuthenticationFlows(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6224,7 +6224,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 		Type:        gokeycloak.StringP("basic-flow"),
 	}
 
-	err := client.CreateAuthenticationFlow(
+	_, err := client.CreateAuthenticationFlow(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6233,7 +6233,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	require.NoError(t, err, "Failed to create authentication flow")
 	t.Logf("authentication flows: %+v", authFlow)
 
-	err = client.CreateAuthenticationExecution(
+	_, err = client.CreateAuthenticationExecution(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6242,7 +6242,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	)
 	require.NoError(t, err, "Failed to create authentication execution")
 
-	err = client.CreateAuthenticationExecutionFlow(
+	_, err = client.CreateAuthenticationExecutionFlow(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6251,7 +6251,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	)
 	require.NoError(t, err, "Failed to create authentication execution flow")
 
-	authExecs, err := client.GetAuthenticationExecutions(
+	_, authExecs, err := client.GetAuthenticationExecutions(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6265,7 +6265,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	for _, execution := range authExecs {
 		if execution.ProviderID != nil && *execution.ProviderID == *authExec.Provider {
 			execution.Requirement = gokeycloak.StringP("ALTERNATIVE")
-			err = client.UpdateAuthenticationExecution(
+			_, err = client.UpdateAuthenticationExecution(
 				context.Background(),
 				token.AccessToken,
 				cfg.GoKeycloak.Realm,
@@ -6276,7 +6276,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 			break
 		}
 	}
-	authExecs, err = client.GetAuthenticationExecutions(
+	_, authExecs, err = client.GetAuthenticationExecutions(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6297,7 +6297,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 		if execution.ProviderID != nil && *execution.ProviderID == *authExec.Provider {
 			require.NotNil(t, execution.Requirement)
 			require.Equal(t, *execution.Requirement, "ALTERNATIVE")
-			err = client.DeleteAuthenticationExecution(
+			_, err = client.DeleteAuthenticationExecution(
 				context.Background(),
 				token.AccessToken,
 				cfg.GoKeycloak.Realm,
@@ -6314,7 +6314,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	require.True(t, execFlowFound, "Failed to find authentication execution flow")
 
 	authFlow.Description = gokeycloak.StringP("my-new-description")
-	_, err = client.UpdateAuthenticationFlow(
+	_, _, err = client.UpdateAuthenticationFlow(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6325,7 +6325,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	require.NoError(t, err, "Failed to update authentication flow")
 	t.Logf("updated authentication flow: %+v", authFlow)
 
-	retrievedAuthFlow, err := client.GetAuthenticationFlow(
+	_, retrievedAuthFlow, err := client.GetAuthenticationFlow(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
@@ -6334,7 +6334,7 @@ func TestGocloak_CreateAuthenticationFlowsAndCreateAuthenticationExecutionAndFlo
 	require.NoError(t, err, "Failed to fetch authentication flow")
 	t.Logf("retrieved authentication flow: %+v", retrievedAuthFlow)
 	require.Equal(t, "my-new-description", gokeycloak.PString(retrievedAuthFlow.Description))
-	err = client.DeleteAuthenticationFlow(
+	_, err = client.DeleteAuthenticationFlow(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm,
