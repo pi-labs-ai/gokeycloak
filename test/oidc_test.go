@@ -182,7 +182,7 @@ func Test_GetServerInfo(t *testing.T) {
 	client := NewClientWithDebug(t)
 	// client.RestyClient().SetDebug(true)
 	token := GetAdminToken(t, client)
-	serverInfo, err := client.GetAllRealmsInfo(
+	_, serverInfo, err := client.GetAllRealmsInfo(
 		context.Background(),
 		token.AccessToken,
 	)
@@ -190,7 +190,7 @@ func Test_GetServerInfo(t *testing.T) {
 	t.Logf("Server Info: %+v", serverInfo)
 
 	FailRequest(client, nil, 1, 0)
-	_, err = client.GetAllRealmsInfo(
+	_, _, err = client.GetAllRealmsInfo(
 		context.Background(),
 		token.AccessToken,
 	)
