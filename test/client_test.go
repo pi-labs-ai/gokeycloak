@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/pkcs12"
 
-	"github.com/sourabhmandal/gokeycloak"
+	"github.com/zblocks/gokeycloak"
 )
 
 type configAdmin struct {
