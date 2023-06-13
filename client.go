@@ -4,6 +4,7 @@ package gokeycloak
 import (
 	"context"
 	"encoding/base64"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -167,32 +168,32 @@ func SetCertCacheInvalidationTime(duration time.Duration) func(g *GoKeycloak) {
 }
 
 // RevokeUserConsents revokes the given user consent.
-func (g *GoKeycloak) RevokeUserConsents(ctx context.Context, accessToken, realm, userID, clientID string) error {
+func (g *GoKeycloak) RevokeUserConsents(ctx context.Context, accessToken, realm, userID, clientID string) (int, error) {
 	const errMessage = "could not revoke consents"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, accessToken).
 		Delete(g.getAdminRealmURL(realm, "users", userID, "consents", clientID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // LogoutUserSession logs out a single sessions of a user given a session id
-func (g *GoKeycloak) LogoutUserSession(ctx context.Context, accessToken, realm, session string) error {
+func (g *GoKeycloak) LogoutUserSession(ctx context.Context, accessToken, realm, session string) (int, error) {
 	const errMessage = "could not logout"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, accessToken).
 		Delete(g.getAdminRealmURL(realm, "sessions", session))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // ExecuteActionsEmail executes an actions email
-func (g *GoKeycloak) ExecuteActionsEmail(ctx context.Context, token, realm string, params ExecuteActionsEmail) error {
+func (g *GoKeycloak) ExecuteActionsEmail(ctx context.Context, token, realm string, params ExecuteActionsEmail) (int, error) {
 	const errMessage = "could not execute actions email"
 
 	queryParams, err := GetQueryParams(params)
 	if err != nil {
-		return errors.Wrap(err, errMessage)
+		return http.StatusInternalServerError, errors.Wrap(err, errMessage)
 	}
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -200,7 +201,7 @@ func (g *GoKeycloak) ExecuteActionsEmail(ctx context.Context, token, realm strin
 		SetQueryParams(queryParams).
 		Put(g.getAdminRealmURL(realm, "users", *(params.UserID), "execute-actions-email"))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // CreateComponent creates the given component.
@@ -300,18 +301,18 @@ func (g *GoKeycloak) CreateClientScopeProtocolMapper(ctx context.Context, token,
 }
 
 // UpdateClient updates the given Client
-func (g *GoKeycloak) UpdateClient(ctx context.Context, token, realm string, updatedClient Client) error {
+func (g *GoKeycloak) UpdateClient(ctx context.Context, token, realm string, updatedClient Client) (int, error) {
 	const errMessage = "could not update client"
 
 	if NilOrEmpty(updatedClient.ID) {
-		return errors.Wrap(errors.New("ID of a client required"), errMessage)
+		return http.StatusInternalServerError, errors.Wrap(errors.New("ID of a client required"), errMessage)
 	}
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		SetBody(updatedClient).
 		Put(g.getAdminRealmURL(realm, "clients", PString(updatedClient.ID)))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // UpdateClientRepresentation updates the given client representation
@@ -337,96 +338,96 @@ func (g *GoKeycloak) UpdateClientRepresentation(ctx context.Context, accessToken
 }
 
 // UpdateRole updates the given role.
-func (g *GoKeycloak) UpdateRole(ctx context.Context, token, realm, idOfClient string, role Role) error {
+func (g *GoKeycloak) UpdateRole(ctx context.Context, token, realm, idOfClient string, role Role) (int, error) {
 	const errMessage = "could not update role"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		SetBody(role).
 		Put(g.getAdminRealmURL(realm, "clients", idOfClient, "roles", PString(role.Name)))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // UpdateClientScope updates the given client scope.
-func (g *GoKeycloak) UpdateClientScope(ctx context.Context, token, realm string, scope ClientScope) error {
+func (g *GoKeycloak) UpdateClientScope(ctx context.Context, token, realm string, scope ClientScope) (int, error) {
 	const errMessage = "could not update client scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		SetBody(scope).
 		Put(g.getAdminRealmURL(realm, "client-scopes", PString(scope.ID)))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // UpdateClientScopeProtocolMapper updates the given protocol mapper for a client scope
-func (g *GoKeycloak) UpdateClientScopeProtocolMapper(ctx context.Context, token, realm, scopeID string, protocolMapper ProtocolMappers) error {
+func (g *GoKeycloak) UpdateClientScopeProtocolMapper(ctx context.Context, token, realm, scopeID string, protocolMapper ProtocolMappers) (int, error) {
 	const errMessage = "could not update client scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		SetBody(protocolMapper).
 		Put(g.getAdminRealmURL(realm, "client-scopes", scopeID, "protocol-mappers", "models", PString(protocolMapper.ID)))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteClient deletes a given client
-func (g *GoKeycloak) DeleteClient(ctx context.Context, token, realm, idOfClient string) error {
+func (g *GoKeycloak) DeleteClient(ctx context.Context, token, realm, idOfClient string) (int, error) {
 	const errMessage = "could not delete client"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "clients", idOfClient))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteComponent deletes the component with the given id.
-func (g *GoKeycloak) DeleteComponent(ctx context.Context, token, realm, componentID string) error {
+func (g *GoKeycloak) DeleteComponent(ctx context.Context, token, realm, componentID string) (int, error) {
 	const errMessage = "could not delete component"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "components", componentID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteClientRepresentation deletes a given client representation.
-func (g *GoKeycloak) DeleteClientRepresentation(ctx context.Context, accessToken, realm, clientID string) error {
+func (g *GoKeycloak) DeleteClientRepresentation(ctx context.Context, accessToken, realm, clientID string) (int, error) {
 	const errMessage = "could not delete client representation"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, accessToken).
 		Delete(g.getRealmURL(realm, "clients-registrations", "default", clientID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteClientRole deletes a given role.
-func (g *GoKeycloak) DeleteClientRole(ctx context.Context, token, realm, idOfClient, roleName string) error {
+func (g *GoKeycloak) DeleteClientRole(ctx context.Context, token, realm, idOfClient, roleName string) (int, error) {
 	const errMessage = "could not delete client role"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "clients", idOfClient, "roles", roleName))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteClientScope deletes the scope with the given id.
-func (g *GoKeycloak) DeleteClientScope(ctx context.Context, token, realm, scopeID string) error {
+func (g *GoKeycloak) DeleteClientScope(ctx context.Context, token, realm, scopeID string) (int, error) {
 	const errMessage = "could not delete client scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "client-scopes", scopeID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // DeleteClientScopeProtocolMapper deletes the given protocol mapper from the client scope
-func (g *GoKeycloak) DeleteClientScopeProtocolMapper(ctx context.Context, token, realm, scopeID, protocolMapperID string) error {
+func (g *GoKeycloak) DeleteClientScopeProtocolMapper(ctx context.Context, token, realm, scopeID, protocolMapperID string) (int, error) {
 	const errMessage = "could not delete client scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "client-scopes", scopeID, "protocol-mappers", "models", protocolMapperID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // GetClient returns a client
@@ -498,23 +499,23 @@ func (g *GoKeycloak) GetClientsDefaultScopes(ctx context.Context, token, realm, 
 }
 
 // AddDefaultScopeToClient adds a client scope to the list of client's default scopes
-func (g *GoKeycloak) AddDefaultScopeToClient(ctx context.Context, token, realm, idOfClient, scopeID string) error {
+func (g *GoKeycloak) AddDefaultScopeToClient(ctx context.Context, token, realm, idOfClient, scopeID string) (int, error) {
 	const errMessage = "could not add default scope to client"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Put(g.getAdminRealmURL(realm, "clients", idOfClient, "default-client-scopes", scopeID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // RemoveDefaultScopeFromClient removes a client scope from the list of client's default scopes
-func (g *GoKeycloak) RemoveDefaultScopeFromClient(ctx context.Context, token, realm, idOfClient, scopeID string) error {
+func (g *GoKeycloak) RemoveDefaultScopeFromClient(ctx context.Context, token, realm, idOfClient, scopeID string) (int, error) {
 	const errMessage = "could not remove default scope from client"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "clients", idOfClient, "default-client-scopes", scopeID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // GetClientsOptionalScopes returns a list of the client's optional scopes
@@ -535,23 +536,23 @@ func (g *GoKeycloak) GetClientsOptionalScopes(ctx context.Context, token, realm,
 }
 
 // AddOptionalScopeToClient adds a client scope to the list of client's optional scopes
-func (g *GoKeycloak) AddOptionalScopeToClient(ctx context.Context, token, realm, idOfClient, scopeID string) error {
+func (g *GoKeycloak) AddOptionalScopeToClient(ctx context.Context, token, realm, idOfClient, scopeID string) (int, error) {
 	const errMessage = "could not add optional scope to client"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Put(g.getAdminRealmURL(realm, "clients", idOfClient, "optional-client-scopes", scopeID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // RemoveOptionalScopeFromClient deletes a client scope from the list of client's optional scopes
-func (g *GoKeycloak) RemoveOptionalScopeFromClient(ctx context.Context, token, realm, idOfClient, scopeID string) error {
+func (g *GoKeycloak) RemoveOptionalScopeFromClient(ctx context.Context, token, realm, idOfClient, scopeID string) (int, error) {
 	const errMessage = "could not remove optional scope from client"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
 		Delete(g.getAdminRealmURL(realm, "clients", idOfClient, "optional-client-scopes", scopeID))
 
-	return checkForError(resp, err, errMessage)
+	return resp.StatusCode(), checkForError(resp, err, errMessage)
 }
 
 // GetDefaultOptionalClientScopes returns a list of default realm optional scopes
@@ -708,7 +709,7 @@ func (g *GoKeycloak) GetClientScopeMappingsRealmRolesAvailable(ctx context.Conte
 }
 
 // CreateClientScopeMappingsRealmRoles create realm-level roles to the client’s scope
-func (g *GoKeycloak) CreateClientScopeMappingsRealmRoles(ctx context.Context, token, realm, idOfClient string, roles []Role) error {
+func (g *GoKeycloak) CreateClientScopeMappingsRealmRoles(ctx context.Context, token, realm, idOfClient string, roles []Role) (int, error) {
 	const errMessage = "could not create realm-level roles to the client’s scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -719,7 +720,7 @@ func (g *GoKeycloak) CreateClientScopeMappingsRealmRoles(ctx context.Context, to
 }
 
 // DeleteClientScopeMappingsRealmRoles deletes realm-level roles from the client’s scope
-func (g *GoKeycloak) DeleteClientScopeMappingsRealmRoles(ctx context.Context, token, realm, idOfClient string, roles []Role) error {
+func (g *GoKeycloak) DeleteClientScopeMappingsRealmRoles(ctx context.Context, token, realm, idOfClient string, roles []Role) (int, error) {
 	const errMessage = "could not delete realm-level roles from the client’s scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -764,7 +765,7 @@ func (g *GoKeycloak) GetClientScopeMappingsClientRolesAvailable(ctx context.Cont
 }
 
 // CreateClientScopeMappingsClientRoles creates client-level roles from the client’s scope
-func (g *GoKeycloak) CreateClientScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClient, idOfSelectedClient string, roles []Role) error {
+func (g *GoKeycloak) CreateClientScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClient, idOfSelectedClient string, roles []Role) (int, error) {
 	const errMessage = "could not create client-level roles from the client’s scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -775,7 +776,7 @@ func (g *GoKeycloak) CreateClientScopeMappingsClientRoles(ctx context.Context, t
 }
 
 // DeleteClientScopeMappingsClientRoles deletes client-level roles from the client’s scope
-func (g *GoKeycloak) DeleteClientScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClient, idOfSelectedClient string, roles []Role) error {
+func (g *GoKeycloak) DeleteClientScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClient, idOfSelectedClient string, roles []Role) (int, error) {
 	const errMessage = "could not delete client-level roles from the client’s scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -882,7 +883,7 @@ func (g *GoKeycloak) CreateClientProtocolMapper(ctx context.Context, token, real
 }
 
 // UpdateClientProtocolMapper updates a protocol mapper in client scope
-func (g *GoKeycloak) UpdateClientProtocolMapper(ctx context.Context, token, realm, idOfClient, mapperID string, mapper ProtocolMapperRepresentation) error {
+func (g *GoKeycloak) UpdateClientProtocolMapper(ctx context.Context, token, realm, idOfClient, mapperID string, mapper ProtocolMapperRepresentation) (int, error) {
 	const errMessage = "could not update client protocol mapper"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -893,7 +894,7 @@ func (g *GoKeycloak) UpdateClientProtocolMapper(ctx context.Context, token, real
 }
 
 // DeleteClientProtocolMapper deletes a protocol mapper in client scope
-func (g *GoKeycloak) DeleteClientProtocolMapper(ctx context.Context, token, realm, idOfClient, mapperID string) error {
+func (g *GoKeycloak) DeleteClientProtocolMapper(ctx context.Context, token, realm, idOfClient, mapperID string) (int, error) {
 	const errMessage = "could not delete client protocol mapper"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1141,7 +1142,7 @@ func UserAttributeContains(attributes map[string][]string, attribute, value stri
 }
 
 // ClearUserCache clears realm cache
-func (g *GoKeycloak) ClearUserCache(ctx context.Context, token, realm string) error {
+func (g *GoKeycloak) ClearUserCache(ctx context.Context, token, realm string) (int, error) {
 	const errMessage = "could not clear user cache"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1151,7 +1152,7 @@ func (g *GoKeycloak) ClearUserCache(ctx context.Context, token, realm string) er
 }
 
 // ClearKeysCache clears realm cache
-func (g *GoKeycloak) ClearKeysCache(ctx context.Context, token, realm string) error {
+func (g *GoKeycloak) ClearKeysCache(ctx context.Context, token, realm string) (int, error) {
 	const errMessage = "could not clear keys cache"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1161,7 +1162,7 @@ func (g *GoKeycloak) ClearKeysCache(ctx context.Context, token, realm string) er
 }
 
 // AddClientRoleComposite adds roles as composite
-func (g *GoKeycloak) AddClientRoleComposite(ctx context.Context, token, realm, roleID string, roles []Role) error {
+func (g *GoKeycloak) AddClientRoleComposite(ctx context.Context, token, realm, roleID string, roles []Role) (int, error) {
 	const errMessage = "could not add client role composite"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1172,7 +1173,7 @@ func (g *GoKeycloak) AddClientRoleComposite(ctx context.Context, token, realm, r
 }
 
 // DeleteClientRoleComposite deletes composites from a role
-func (g *GoKeycloak) DeleteClientRoleComposite(ctx context.Context, token, realm, roleID string, roles []Role) error {
+func (g *GoKeycloak) DeleteClientRoleComposite(ctx context.Context, token, realm, roleID string, roles []Role) (int, error) {
 	const errMessage = "could not delete client role composite"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1217,7 +1218,7 @@ func (g *GoKeycloak) GetClientScopesScopeMappingsRealmRoles(ctx context.Context,
 }
 
 // DeleteClientScopesScopeMappingsRealmRoles deletes realm-level roles from the client-scope
-func (g *GoKeycloak) DeleteClientScopesScopeMappingsRealmRoles(ctx context.Context, token, realm, clientScopeID string, roles []Role) error {
+func (g *GoKeycloak) DeleteClientScopesScopeMappingsRealmRoles(ctx context.Context, token, realm, clientScopeID string, roles []Role) (int, error) {
 	const errMessage = "could not delete realm-level roles from the client-scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1228,7 +1229,7 @@ func (g *GoKeycloak) DeleteClientScopesScopeMappingsRealmRoles(ctx context.Conte
 }
 
 // CreateClientScopesScopeMappingsRealmRoles creates realm-level roles to the client scope
-func (g *GoKeycloak) CreateClientScopesScopeMappingsRealmRoles(ctx context.Context, token, realm, clientScopeID string, roles []Role) error {
+func (g *GoKeycloak) CreateClientScopesScopeMappingsRealmRoles(ctx context.Context, token, realm, clientScopeID string, roles []Role) (int, error) {
 	const errMessage = "could not create realm-level roles to the client-scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1239,7 +1240,7 @@ func (g *GoKeycloak) CreateClientScopesScopeMappingsRealmRoles(ctx context.Conte
 }
 
 // RegisterRequiredAction creates a required action for a given realm
-func (g *GoKeycloak) RegisterRequiredAction(ctx context.Context, token string, realm string, requiredAction RequiredActionProviderRepresentation) error {
+func (g *GoKeycloak) RegisterRequiredAction(ctx context.Context, token string, realm string, requiredAction RequiredActionProviderRepresentation) (int, error) {
 	const errMessage = "could not create required action"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1290,7 +1291,7 @@ func (g *GoKeycloak) GetRequiredAction(ctx context.Context, token string, realm 
 }
 
 // UpdateRequiredAction updates a required action for a given realm
-func (g *GoKeycloak) UpdateRequiredAction(ctx context.Context, token string, realm string, requiredAction RequiredActionProviderRepresentation) error {
+func (g *GoKeycloak) UpdateRequiredAction(ctx context.Context, token string, realm string, requiredAction RequiredActionProviderRepresentation) (int, error) {
 	const errMessage = "could not update required action"
 
 	if NilOrEmpty(requiredAction.ProviderID) {
@@ -1304,7 +1305,7 @@ func (g *GoKeycloak) UpdateRequiredAction(ctx context.Context, token string, rea
 }
 
 // DeleteRequiredAction updates a required action for a given realm
-func (g *GoKeycloak) DeleteRequiredAction(ctx context.Context, token string, realm string, alias string) error {
+func (g *GoKeycloak) DeleteRequiredAction(ctx context.Context, token string, realm string, alias string) (int, error) {
 	const errMessage = "could not delete required action"
 
 	if alias == "" {
@@ -1323,7 +1324,7 @@ func (g *GoKeycloak) DeleteRequiredAction(ctx context.Context, token string, rea
 // CreateClientScopesScopeMappingsClientRoles attaches a client role to a client scope (not client's scope)
 func (g *GoKeycloak) CreateClientScopesScopeMappingsClientRoles(
 	ctx context.Context, token, realm, idOfClientScope, idOfClient string, roles []Role,
-) error {
+) (int, error) {
 	const errMessage = "could not create client-level roles to the client-scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
@@ -1372,7 +1373,7 @@ func (g *GoKeycloak) GetClientScopesScopeMappingsClientRoles(ctx context.Context
 
 // DeleteClientScopesScopeMappingsClientRoles removes attachment of client roles from a client scope
 // (not client's scope).
-func (g *GoKeycloak) DeleteClientScopesScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClientScope, idOfClient string, roles []Role) error {
+func (g *GoKeycloak) DeleteClientScopesScopeMappingsClientRoles(ctx context.Context, token, realm, idOfClientScope, idOfClient string, roles []Role) (int, error) {
 	const errMessage = "could not delete client-level roles from the client-scope"
 
 	resp, err := g.GetRequestWithBearerAuth(ctx, token).
