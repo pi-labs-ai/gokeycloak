@@ -409,6 +409,7 @@ type ClientScope struct {
 	ID                    *string                `json:"id,omitempty"`
 	Name                  *string                `json:"name,omitempty"`
 	Description           *string                `json:"description,omitempty"`
+	Type                  *string                `json:"type,omitempty"`
 	Protocol              *string                `json:"protocol,omitempty"`
 	ClientScopeAttributes *ClientScopeAttributes `json:"attributes,omitempty"`
 	ProtocolMappers       *[]ProtocolMappers     `json:"protocolMappers,omitempty"`
@@ -419,6 +420,7 @@ type ClientScopeAttributes struct {
 	ConsentScreenText      *string `json:"consent.screen.text,omitempty"`
 	DisplayOnConsentScreen *string `json:"display.on.consent.screen,omitempty"`
 	IncludeInTokenScope    *string `json:"include.in.token.scope,omitempty"`
+	GuiOrder               *string `json:"gui.order,omitempty"`
 }
 
 // ProtocolMappers are protocolmappers
