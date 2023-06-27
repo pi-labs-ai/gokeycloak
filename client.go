@@ -220,7 +220,7 @@ func (g *GoKeycloak) CreateComponent(ctx context.Context, token, realm string, c
 }
 
 // CreateClient creates the given g.
-func (g *GoKeycloak) CreateClient(ctx context.Context, clientInitialAccessToken, realm string, newClient Client) (int, CreateClientResponse, error) {
+func (g *GoKeycloak) CreateClient(ctx context.Context, clientInitialAccessToken, realm string, newClient CreateClientRequest) (int, CreateClientResponse, error) {
 	const errMessage = "could not create client"
 
 	var result CreateClientResponse

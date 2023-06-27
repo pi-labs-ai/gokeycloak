@@ -26,7 +26,7 @@ func Test_GetUserInfo(t *testing.T) {
 		context.Background(),
 		token.AccessToken,
 		cfg.GoKeycloak.Realm)
-	require.Error(t, err, "")
+	require.Error(t, err, nil)
 }
 
 func Test_GetRawUserInfo(t *testing.T) {
