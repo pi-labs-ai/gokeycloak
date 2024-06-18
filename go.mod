@@ -1,4 +1,4 @@
-module github.com/zblocks/gokeycloak
+module github.com/pi-labs-ai/gokeycloak
 
 go 1.20
 

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zblocks/gokeycloak"
+	"github.com/pi-labs-ai/gokeycloak"
 	"github.com/stretchr/testify/require"
 )
 
