@@ -3,7 +3,7 @@ package gokeycloak_test
 import (
 	"testing"
 
-	"github.com/zblocks/gokeycloak"
+	"github.com/pi-labs-ai/gokeycloak"
 	"github.com/stretchr/testify/assert"
 )
 

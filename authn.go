@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pi-labs-ai/gokeycloak/pkg/jwx"
 	"github.com/segmentio/ksuid"
-	"github.com/zblocks/gokeycloak/pkg/jwx"
 )
 
 // LoginAdmin performs a login with Admin client

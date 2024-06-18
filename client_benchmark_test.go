@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/zblocks/gokeycloak"
+	"github.com/pi-labs-ai/gokeycloak"
 	"github.com/stretchr/testify/assert"
 )
 
